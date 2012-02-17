@@ -218,6 +218,32 @@ class ConfigurationObjectSpec extends FlatSpec with ShouldMatchers with io.IOHel
    val config2 = Configuration.loadResource( resName )
    config2 should be (config)
  }
+  
+ it can "load from two files, merging results with precedence" in {
+   val fmt = FlatFormat
+   val s1 =
+     """
+     foo = true
+     bar = 2
+     """
+   val s2 =
+     """
+     baz = "hello world"
+     bar = 4
+     """
+   autoFile( s1 ){ file1 =>
+     autoFile( s2 ){ file2 =>
+       val fn1 = file1.getAbsolutePath
+       val fn2 = file2.getAbsolutePath
+       val config = Configuration.load(fmt, fn1, fn2)
+       config.get[Boolean]("foo") should be (Some(true))
+       config.get[Int]("bar") should be (Some(4))
+       config.get[String]("baz") should be (Some("hello world"))
+       val config2 = Configuration.load(fn1, fn2)
+       config2 should be (config)
+     }
+   }
+ }
 
 }
 

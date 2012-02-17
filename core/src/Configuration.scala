@@ -215,6 +215,22 @@ object Configuration {
     load( Source.fromFile( fileName ) )
 
   /**
+   * Load a configuration from multiple files, overriding properties on
+   * the first files with properties from the later files
+   */
+  def load( fileNames: String* )
+  (implicit codec: scala.io.Codec): Configuration =
+    fileNames.map { load(_)}.foldLeft(Configuration()) { (a,b) => b.include(a)}
+
+  /**
+   * Load a configuration from multiple files, overriding properties on
+   * the first files with properties from the later files using a given format
+   */
+  def load( fmt: ImportFormat, fileNames: String* )
+          (implicit codec: scala.io.Codec): Configuration =
+    fileNames.map { load(_, fmt)}.foldLeft(Configuration()) { (a,b) => b.include(a)}
+
+  /**
    * Load a configuration from a file specified by a filename and
    * using a given format.
    */
